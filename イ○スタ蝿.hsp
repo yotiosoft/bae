@@ -1,0 +1,338 @@
+/*--------------------------------------------------------------------------------------------------
+
+											イ○スタ蝿
+
+										  YotioSoft 2017
+
+--------------------------------------------------------------------------------------------------*/
+
+*start
+	screen 0, 320, 480
+
+	#packopt icon "i/logo.ico"
+
+	windowx = 320
+	windowy = 480
+
+	title "イ○スタ蝿"
+
+	randomize
+
+#module
+/*半透明色表示命令（機能はboxfaと同じ）*/
+#deffunc sboxf int depth, int ax, int ay, int bx, int by
+	pdx = ax, bx, bx, ax
+	pdy = ay, ay, by, by
+	gmode 3,,,depth
+	gsquare -1,pdx, pdy
+	return
+#global
+
+*buffering
+	celload "i/title.png", 1
+	celload "i/button.png", 2
+	celload "i/battery.png", 4
+	celload "i/board.png", 5
+
+*bgm_play_and_rnd
+	mmstop
+	mmload "bgm/冬なんて嫌いさ_2.mp3", 0, 1
+	mmplay
+
+	img_num = rnd(10)
+	celload "i/back_image_"+img_num+".jpg", 3
+
+*title_menu
+	clrobj
+	
+	objsize 100, 20
+	pos windowx/2 - 50, windowy - 70 : button "はじめる", *main
+	pos windowx/2 - 50, windowy - 40 : button "あそびかた", *howto
+
+	fly_x_t = windowx/2
+	fly_y_t = windowy/2
+	
+	repeat
+		pos 0, 0 : gmode 0 : gcopy 3, 0, 0, 320, 480
+			
+		pos 0, 0 : gmode 2 : gcopy 1, 0, 0, 320, 120
+
+		direction = rnd(4)
+		
+		if direction = 0 and fly_x_t >= 0 {
+			fly_x_t -= 10
+		}
+		if direction = 1 and fly_x_t <= windowx {
+			fly_x_t += 10
+		}
+		if direction = 2 and fly_y_t >= 0 {
+			fly_y_t -= 10
+		}
+		if direction = 3 and fly_y_y <= windowy {
+			fly_y_t += 10
+		}
+		
+		color 0, 0, 0 : circle fly_x_t-2, fly_y_t-2, fly_x_t+2, fly_y_t+2
+
+		await 100
+	loop
+
+	stop
+
+*main
+	clrobj
+
+	mmstop
+	mmload "bgm/Run_Run_Run.mp3", 0, 1
+	mmplay
+	
+	dim fly_x, 10
+	dim fly_y, 10
+
+	sdim fly_comment, 10
+	dim fly_comment_t, 10
+	dim crgb, 10
+
+	flies = 0
+
+	repeat 10
+		fly_x(cnt) = rnd(windowx)
+		fly_y(cnt) = rnd(50)+20
+
+		flies += 1
+
+		fly_comment(cnt) = ""
+		fly_comment_t(cnt) = -1
+	loop
+
+	time = 101.0
+
+	img_num = rnd(10)
+	celload "i/back_image_"+img_num+".jpg", 3
+
+	thumbnail_num = rnd(5)
+	celload "i/thumbnail_"+thumbnail_num+".png", 7
+
+	onclick gosub *on_click
+
+	repeat
+		redraw 0
+
+		pos 0, 0 : gmode 0 : gcopy 3, 0, 0, 320, 480
+		
+		repeat 10
+			if fly_x(cnt) != -1 {
+				direction = rnd(4)
+		
+				if direction = 0 {
+					fly_x(cnt) -= 10
+				}
+				if direction = 1 {
+					fly_x(cnt) += 10
+				}
+				if direction = 2 {
+					fly_y(cnt) -= 10
+				}
+				if direction = 3 {
+					fly_y(cnt) += 10
+				}
+		
+				color 0, 0, 0 : circle fly_x(cnt)-2, fly_y(cnt)-2, fly_x(cnt)+2, fly_y(cnt)+2
+
+				if fly_x(cnt) < 0 or fly_y(cnt) < 20 or fly_x > 320 or fly_y > 480 {
+					flies -= 1
+
+					fly_x(cnt) = -1
+					fly_y(cnt) = -1
+				}
+
+				new_comment = rnd(30)
+
+				if new_comment = 0 and fly_comment(cnt) = "" and fly_comment_t(cnt) = -1 {
+					comment_num = rnd(10)
+					if comment_num = 0 {
+						fly_comment(cnt) = "キャー！ステキ！"
+					}
+					if comment_num = 1 {
+						fly_comment(cnt) = "イ○スタバエ！イン○タバエ！"
+					}
+					if comment_num = 2 {
+						fly_comment(cnt) = "いいねください！"
+					}
+					if comment_num = 3 {
+						fly_comment(cnt) = "イ○スタ映えするよね～"
+					}
+					if comment_num = 4 {
+						fly_comment(cnt) = "イ○スタ映えしそう！"
+					}
+					if comment_num = 5 {
+						fly_comment(cnt) = "イ○スタ映えしてる！"
+					}
+					if comment_num = 6 {
+						fly_comment(cnt) = "イ○スタなう！"
+					}
+					if comment_num = 7 {
+						fly_comment(cnt) = "写真撮らなきゃ！"
+					}
+					if comment_num = 8 {
+						fly_comment(cnt) = "ハッシュタグ何にしようかな～"
+					}
+					if comment_num = 9 {
+						fly_comment(cnt) = "自撮り棒！自撮り棒！"
+					}
+					
+					fly_comment_t(cnt) = 0
+
+					pget fly_x(cnt) + 3, fly_y(cnt) - 5
+					if ginfo_r < 80 and ginfo_g < 80 and ginfo_b < 80 {
+						crgb(cnt) = 255
+					} else {
+						crgb(cnt) = 0
+					}
+				} else : if fly_comment_t(cnt) > 30 {
+					fly_comment(cnt) = ""
+					fly_comment_t(cnt) = -1
+				}
+				if fly_comment(cnt) != "" {
+					fly_comment_t(cnt) += 1
+				}
+					
+				color crgb(cnt), crgb(cnt), crgb(cnt) : font "", 10
+				pos fly_x(cnt) + 3, fly_y(cnt) - 5 : mes fly_comment(cnt)
+			}
+	
+			await 10
+		loop
+
+		time -= 0.75
+
+		if int(time) < 0 {
+			goto *time_over
+		}
+
+		//電池の残量（残り時間）
+			color 0, 0, 0 : boxf 0, 0, windowx, 20
+			pos windowx-69, 0 : gcopy 4, 0, 0, 128, 20
+
+			if int(time) > 15 {
+				color 255, 255, 255
+			} else {
+				color 255, 0, 0
+			}
+
+			font "", 14
+			pos windowx-69 + 64/2-10, 3 : mes ""+int(time)+"%" 
+
+		//撮影ボタン
+			pos windowx/2-32, windowy-74 : gmode 2 : gcopy 2, 0, 0, 64, 64
+
+		//サムネイル画像
+			color 128, 128, 128 : boxf windowx-82, windowy-82, windowx-14, windowy-14
+			pos windowx-79, windowy-79 : gmode 0 : gcopy 7, 0, 0, 64, 64
+
+		redraw 1
+	loop
+
+*on_click
+	if mousex > windowx/2-32 and mousex < windowx/2-32+64 and mousey > windowy-74 and mousey < windowy-74+64 {
+		goto *take
+	}
+
+	if mousex > windowx-79 and mousex < windowx-79+64 and mousey > windowy-79 and mousey < windowy-79+64 {
+		dialog "ちーがーうーだーろー！\nそこは撮影ボタンじゃないだろー！\nこの(ry", 1
+	}
+
+	return
+
+*take
+	mmstop
+	mmload "bgm/camera-shutter1.mp3"
+	mmplay
+
+	redraw 1
+
+	onclick 0
+
+	//ハエが写った写真をバッファ
+		buffer 6, windowx, windowy
+			gmode 0
+			pos 0, 0 : gcopy 3, 0, 0, 320, 480
+
+			repeat 10
+				color 0, 0, 0 : circle fly_x(cnt)-2, fly_y(cnt)-2, fly_x(cnt)+2, fly_y(cnt)+2
+			loop
+
+		gsel 0
+
+	//画像を小さく
+		repeat 100
+			redraw 0
+			pos 0, 0 : gcopy 5, 0, 0, 320, 480
+
+			pos cnt/2, cnt*double(windowy/windowx)/2 : gzoom windowx-cnt, windowy-cnt*double(windowy/windowx), 6, 0, 0, windowx, windowy
+			redraw 1
+		loop
+
+		wait 200
+
+	//結果表示
+		color 255, 255, 255
+		sboxf 128, 0, 100, windowy-100, windowx
+
+		color 0, 0, 0 : font "", 24
+		pos 70, 150 : mes "ハエの数 "+flies+"匹\n電池の残量 "+int(time)+"%"
+
+		wait 100
+
+		if flies <= 0 {
+			score = double(time*4) * 10
+		} else {
+			score = double(time / (flies*2)) * 10
+		}
+		
+		pos 70, 230 : mes "結果 "+int(score)+"点"
+
+		mmload "bgm/こんてぬー.mp3", 0, 1
+		mmplay
+
+	objsize 100, 20
+	pos windowx/2-50, 270 : button "もう一度やる？", *main
+	pos windowx/2-50, 290 : button "タイトルにもどる", *bgm_play_and_rnd
+
+	stop
+
+*time_over
+	mmstop
+	mmload "bgm/こんてぬー.mp3", 0, 1
+	mmplay
+
+	redraw 1
+		
+	//時間切れの旨を表示
+		color 255, 255, 255
+		sboxf 128, 0, 100, windowy-100, windowx
+
+		color 0, 0, 0 : font "", 24
+		pos 100, 150 : mes "時間切れ！"
+
+	objsize 100, 20
+	pos windowx/2-50, 270 : button "もう一度やる？", *main
+	pos windowx/2-50, 290 : button "タイトルにもどる", *bgm_play_and_rnd
+
+	stop
+
+*howto
+	pos 0, 0 : gmode 0 : gcopy 3, 0, 0, 320, 480
+
+	clrobj
+
+	color 255, 255, 255
+	sboxf 128, 0, 50, windowx, windowy-50
+
+	color 0, 0, 0 : font "", 14
+	pos 10, 70 : mes "あなたはスマートフォンで写真を撮ろうとしています。\nしかし、あなたの周りには\nイ○スタバエがたくさんいます。\nこのイ○スタバエがなるべく写らないように、\n電池の残量に注意して\n撮影ボタンを押しましょう。\n\n\n※注意※\n実際に写真を撮って\nSNSにアップロードする際は、\n周りの方に忖度して撮るようにしましょう。\n他人ファーストを心がけることが大切です。"
+
+	pos windowx/2-50, windowy - 90
+	objsize 100, 20 : button "もどる", *title_menu
+
+	stop
